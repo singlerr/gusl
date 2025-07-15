@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="GuslWindow" parent="AdwApplicationWindow">
+    <property name="height-request">200</property>
+    <property name="width-request">360</property>
+    <property name="title" translatable="yes">gusl</property>
+
+    <child>
+      <object class="AdwBreakpoint">
+        <condition>max-width: 500sp</condition>
+        <setter object="split_view" property="collapsed">1</setter>
+      </object>
+    </child>
+
+    <property name="content">
+      <object class="AdwNavigationSplitView" id="split_view">
+        <property name="min-sidebar-width">200</property>
+
+        <property name="sidebar">
+          <object class="AdwNavigationPage">
+            <property name="title" bind-source="GuslWindow" bind-property="title" bind-flags="sync-create"/>
+            <property name="child">
+              <object class="AdwToolbarView">
+
+                <child type="top">
+                  <!-- Sidebar HeaderBar -->
+                  <object class="AdwHeaderBar">
+                    <child type="end">
+                      <object class="GtkMenuButton" id="menu_button">
+                        <property name="tooltip-text" translatable="yes">Main Menu</property>
+                        <property name="menu-model">main_menu</property>
+                        <property name="icon-name">open-menu-symbolic</property>
+                        <property name="primary">1</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <!-- Sidebar content -->
+                <!-- <property name="content">
+                     </property> -->
+
+              </object>
+            </property>
+          </object>
+        </property> <!-- ./sidebar -->
+
+        <property name="content">
+          <object class="AdwNavigationPage" id="content_page">
+            <property name="title" bind-source="GuslWindow" bind-property="title" bind-flags="sync-create"/>
+            <property name="child">
+              <object class="AdwToolbarView">
+
+                <child type="top">
+                  <!-- Main view HeaderBar -->
+                  <object class="AdwHeaderBar">
+                    <property name="show-title">0</property>
+                  </object>
+                </child>
+
+                <!-- Main view content -->
+                <property name="content">
+                  <object class="AdwStatusPage">
+                    <property name="title" translatable="yes">Hello World</property>
+                  </object>
+                </property>
+
+              </object>
+            </property>
+          </object>
+        </property>
+
+      </object>
+    </property> <!-- GuslWindow ./content -->
+
+  </template>
+
+  <menu id="main_menu">
+    <item>
+      <attribute name="label" translatable="yes">_Shortcuts</attribute>
+      <attribute name="action">win.show-help-overlay</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">_Help</attribute>
+      <attribute name="action">app.help</attribute>
+    </item>
+    <item>
+      <attribute name="label" translatable="yes">_About gusl</attribute>
+      <attribute name="action">win.about</attribute>
+    </item>
+  </menu>
+
+</interface>

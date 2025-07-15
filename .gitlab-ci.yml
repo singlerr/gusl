@@ -1,0 +1,53 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  image: pksadiq/gtk:fedora-amd64
+  stage: build
+  variables:
+    CCACHE_DIR: "${CI_PROJECT_DIR}/_ccache"
+    MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
+  script:
+    - CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
+    - ccache --zero-stats
+    - ninja -C _build && xvfb-run -a meson test -C _build
+    - ccache --show-stats
+    - mkdir -p _build/meson-logs/coveragereport
+    - gcovr --root=_build --html-details --print-summary
+      --filter=. --exclude=.*gtkapplication.h --exclude=.*src/resources.c --exclude=.*autocleanups.h
+      -o _build/meson-logs/coveragereport/index.html
+  coverage: '/^lines:.*\s+(\S+\%).*$/'
+  cache:
+    key: build-gtk4
+    paths:
+      - _ccache/
+  artifacts:
+    when: always
+    paths:
+      - _build
+  only:
+    changes:
+      - data/*
+      - docs/*
+      - src/*
+      - tests/*
+      - meson*
+      - .gitlab-ci.yml
+
+pages:
+  image: busybox:1
+  stage: deploy
+  script:
+    - mkdir public
+    - mv _build/meson-logs/coveragereport ${CI_PROJECT_DIR}/public/coverage
+  artifacts:
+    paths:
+      - public
+  only:
+    - master
+  only:
+    changes:
+      - docs/*
+      - src/*

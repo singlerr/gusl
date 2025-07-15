@@ -1,0 +1,9 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+data/metainfo/io.github.singlerr.gusl.metainfo.xml.in
+data/io.github.singlerr.gusl.desktop.in.in
+data/io.github.singlerr.gusl.gschema.xml
+src/gusl-application.c
+src/gusl-window.c
+src/resources/gtk/help-overlay.ui
+src/resources/ui/gusl-window.ui
