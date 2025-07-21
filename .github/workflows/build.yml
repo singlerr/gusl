@@ -13,8 +13,9 @@ on:
 jobs:
   build:
     name: Build and Test
-    using: 'docker'
-    image: 'Dockerfile'
+    runs-on: ubuntu-latest
+    container: 
+      image: singlerr/gtk4-archlinux:latest
     env:
       CCACHE_DIR: "${{ github.workspace }}/_ccache"
       MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
