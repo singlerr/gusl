@@ -3,10 +3,11 @@
   <gresource prefix="/io/github/singlerr/gusl">
     <file preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file preprocess="xml-stripblanks">ui/gusl-window.ui</file>
+    <file preprocess="xml-stripblanks">ui/startup-window.ui</file>
+    <file preprocess="xml-stripblanks">ui/editor-window.ui</file>
 
     <!-- CSS -->
     <file alias="style.css">css/style.css</file>
     <file alias="style-dark.css">css/style-dark.css</file>
   </gresource>
 </gresources>
-

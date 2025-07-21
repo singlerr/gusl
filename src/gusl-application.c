@@ -30,9 +30,9 @@
 
 #include <glib/gi18n.h>
 
-#include "gusl-window.h"
 #include "gusl-application.h"
 #include "gusl-log.h"
+#include "gusl-window.h"
 
 /**
  * SECTION: gusl-application
@@ -43,9 +43,9 @@
 
 struct _GuslApplication
 {
-  AdwApplication  parent_instance;
+  AdwApplication parent_instance;
 
-  GuslSettings    *settings;
+  GuslSettings *settings;
 };
 
 G_DEFINE_TYPE (GuslApplication, gusl_application, ADW_TYPE_APPLICATION)
@@ -54,30 +54,21 @@ G_DEFINE_TYPE (GuslApplication, gusl_application, ADW_TYPE_APPLICATION)
 static gboolean
 cmd_verbose_cb (const char *option_name,
                 const char *value,
-                gpointer    data,
-                GError    **error);
+                gpointer data,
+                GError **error);
 
 static GOptionEntry cmd_options[] = {
-  {
-    "quit", 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL,
-    N_("Quit all running instances of the application"), NULL
-  },
-  {
-    "verbose", 'v', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, cmd_verbose_cb,
-    N_("Show verbose logs"), NULL
-  },
-  {
-    "version", 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL,
-    N_("Show release version"), NULL
-  },
+  { "quit", 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL, N_ ("Quit all running instances of the application"), NULL },
+  { "verbose", 'v', G_OPTION_FLAG_NO_ARG, G_OPTION_ARG_CALLBACK, cmd_verbose_cb, N_ ("Show verbose logs"), NULL },
+  { "version", 0, G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, NULL, N_ ("Show release version"), NULL },
   { NULL }
 };
 
 static gboolean
-cmd_verbose_cb (const char  *option_name,
-                const char  *value,
-                gpointer     data,
-                GError     **error)
+cmd_verbose_cb (const char *option_name,
+                const char *value,
+                gpointer data,
+                GError **error)
 {
   gusl_log_increase_verbosity ();
 
@@ -86,8 +77,8 @@ cmd_verbose_cb (const char  *option_name,
 
 static void
 gusl_application_show_help (GSimpleAction *action,
-                           GVariant      *parameter,
-                           gpointer       user_data)
+                            GVariant *parameter,
+                            gpointer user_data)
 {
   GtkWindow *window;
 
@@ -98,7 +89,7 @@ gusl_application_show_help (GSimpleAction *action,
 
 static int
 gusl_application_handle_local_options (GApplication *application,
-                                      GVariantDict *options)
+                                       GVariantDict *options)
 {
   if (g_variant_dict_contains (options, "version"))
     {
@@ -126,12 +117,12 @@ gusl_application_add_actions (GuslApplication *self)
 
   g_assert (GUSL_IS_APPLICATION (self));
 
-  g_action_map_add_action_entries (G_ACTION_MAP (self), app_entries,
-                                   G_N_ELEMENTS (app_entries), self);
+  g_action_map_add_action_entries (G_ACTION_MAP (self), app_entries, G_N_ELEMENTS (app_entries), self);
 
   for (gsize i = 0; i < G_N_ELEMENTS (accels); i++)
     gtk_application_set_accels_for_action (GTK_APPLICATION (self),
-                                           accels[i].action, accels[i].accel);
+                                           accels[i].action,
+                                           accels[i].accel);
 }
 
 static void
@@ -147,21 +138,20 @@ gusl_application_startup (GApplication *application)
     g_debug ("Run by user: %s", str->str);
   }
 
-  g_info ("%s %s, git version: %s", PACKAGE_NAME,
-          PACKAGE_VERSION, PACKAGE_VCS_VERSION);
+  g_info ("%s %s, git version: %s", PACKAGE_NAME, PACKAGE_VERSION, PACKAGE_VCS_VERSION);
 
   G_APPLICATION_CLASS (gusl_application_parent_class)->startup (application);
 
   gusl_application_add_actions (self);
-  g_set_application_name (_("gusl"));
+  g_set_application_name (_ ("gusl"));
   gtk_window_set_default_icon_name (PACKAGE_ID);
 
   self->settings = gusl_settings_new ();
 }
 
 static int
-gusl_application_command_line (GApplication            *application,
-                              GApplicationCommandLine *command_line)
+gusl_application_command_line (GApplication *application,
+                               GApplicationCommandLine *command_line)
 {
   GVariantDict *options;
 
@@ -234,7 +224,9 @@ GuslApplication *
 gusl_application_new (void)
 {
   return g_object_new (GUSL_TYPE_APPLICATION,
-                       "application-id", PACKAGE_ID,
-                       "flags", G_APPLICATION_HANDLES_COMMAND_LINE,
+                       "application-id",
+                       PACKAGE_ID,
+                       "flags",
+                       G_APPLICATION_HANDLES_COMMAND_LINE,
                        NULL);
 }

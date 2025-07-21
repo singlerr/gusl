@@ -54,6 +54,7 @@ libsrc = [
   'gusl-utils.c',
   'gusl-settings.c',
   'gusl-window.c',
+  'editor-window.c',
 ]
 
 libgusl_shared = shared_library(
@@ -73,7 +74,9 @@ libgusl_static = static_library(
 
 ui_files = files(
   'resources/gtk/help-overlay.ui',
+  'resources/ui/editor-window.ui',
   'resources/ui/gusl-window.ui',
+  'resources/ui/startup-window.ui',
 )
 
 gtk_builder_tool = find_program('gtk4-builder-tool', required: false)

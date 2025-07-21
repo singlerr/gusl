@@ -30,20 +30,24 @@
 
 #include <glib/gi18n.h>
 
-#include "gusl-window.h"
+#include "editor-window.h"
 #include "gusl-log.h"
+#include "gusl-window.h"
+
+#include <string.h>
 
 struct _GuslWindow
 {
-  AdwApplicationWindow  parent_instance;
+  AdwApplicationWindow parent_instance;
 
-  GuslSettings          *settings;
+  GuslSettings *settings;
 
-  GtkWidget            *menu_button;
+  GtkWidget *menu_button;
 };
 
 G_DEFINE_TYPE (GuslWindow, gusl_window, ADW_TYPE_APPLICATION_WINDOW)
 
+static const char *allowed_content_types[] = { "application/zip", "text/x-matlab" };
 
 enum {
   PROP_0,
@@ -52,6 +56,57 @@ enum {
 };
 
 static GParamSpec *properties[N_PROPS];
+
+void
+on_shader_open_response (GObject *source, GAsyncResult *result, gpointer user_data);
+void
+open_shader_clicked (GtkButton *button, GuslWindow *win, gpointer user_data);
+void open_editor_window (GuslWindow *win, gpointer user_data);
+
+void
+open_editor_window (GuslWindow *win, gpointer user_data)
+{
+  GtkApplication *app = gtk_window_get_application (GTK_WINDOW (win));
+  GtkWidget *editor_win = editor_window_new (app, user_data);
+  gtk_window_present (GTK_WINDOW (editor_win));
+}
+
+void
+on_shader_open_response (GObject *source, GAsyncResult *result, gpointer user_data)
+{
+  GuslWindow *win = (GuslWindow *)user_data;
+  GtkFileDialog *dialog = GTK_FILE_DIALOG (source);
+  GError *error = NULL;
+  GFile *file = gtk_file_dialog_open_finish (dialog, result, &error);
+  GFileInfo *metadata;
+  if (file)
+    {
+      g_autofree gchar *path = g_file_get_path (file);
+      metadata = g_file_query_info (file, "standard::*", G_FILE_QUERY_INFO_NONE, NULL, &error);
+
+      if (g_file_info_has_attribute (metadata, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE))
+        {
+          g_object_unref (metadata);
+          open_editor_window (win, path);
+          gtk_window_destroy (GTK_WINDOW (win));
+        }
+
+      g_object_unref (file);
+    }
+  else if (error)
+    {
+      g_printerr ("File open error: %s\n", error->message);
+      g_clear_error (&error);
+    }
+}
+
+void
+open_shader_clicked (GtkButton *button, GuslWindow *win, gpointer user_data)
+{
+  GtkFileDialog *dialog = gtk_file_dialog_new ();
+  gtk_file_dialog_set_title (dialog, _ ("Open Shader"));
+  gtk_file_dialog_open (dialog, GTK_WINDOW (win), NULL, on_shader_open_response, win);
+}
 
 static void
 gusl_window_show_about (GuslWindow *self)
@@ -65,16 +120,26 @@ gusl_window_show_about (GuslWindow *self)
   g_assert (GUSL_IS_WINDOW (self));
 
   about = g_object_new (ADW_TYPE_ABOUT_WINDOW,
-                        "transient-for", self,
-                        "application-name", _("gusl"),
-                        "application-icon", PACKAGE_ID,
-                        "developer-name", "singlerr",
-                        "copyright", _("Copyright © 2024 singlerr"),
-                        "license-type", GTK_LICENSE_GPL_3_0,
-                        "version", PACKAGE_VERSION,
-                        "website", "https://www.sadiqpk.org/projects/gusl.html",
-                        "developers", developers,
-                        "translator-credits", _("translator-credits"),
+                        "transient-for",
+                        self,
+                        "application-name",
+                        _ ("gusl"),
+                        "application-icon",
+                        PACKAGE_ID,
+                        "developer-name",
+                        "singlerr",
+                        "copyright",
+                        _ ("Copyright © 2024 singlerr"),
+                        "license-type",
+                        GTK_LICENSE_GPL_3_0,
+                        "version",
+                        PACKAGE_VERSION,
+                        "website",
+                        "https://www.sadiqpk.org/projects/gusl.html",
+                        "developers",
+                        developers,
+                        "translator-credits",
+                        _ ("translator-credits"),
                         NULL);
 
   gtk_window_present (GTK_WINDOW (about));
@@ -102,10 +167,10 @@ gusl_window_unmap (GtkWidget *widget)
 }
 
 static void
-gusl_window_set_property (GObject      *object,
-                         guint         prop_id,
-                         const GValue *value,
-                         GParamSpec   *pspec)
+gusl_window_set_property (GObject *object,
+                          guint prop_id,
+                          const GValue *value,
+                          GParamSpec *pspec)
 {
   GuslWindow *self = (GuslWindow *)object;
 
@@ -151,12 +216,11 @@ gusl_window_finalize (GObject *object)
 static void
 gusl_window_class_init (GuslWindowClass *klass)
 {
-  GObjectClass   *object_class = G_OBJECT_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
-
   object_class->set_property = gusl_window_set_property;
-  object_class->constructed  = gusl_window_constructed;
-  object_class->finalize     = gusl_window_finalize;
+  object_class->constructed = gusl_window_constructed;
+  object_class->finalize = gusl_window_finalize;
 
   widget_class->unmap = gusl_window_unmap;
 
@@ -166,22 +230,23 @@ gusl_window_class_init (GuslWindowClass *klass)
    * The Application Settings
    */
   properties[PROP_SETTINGS] =
-    g_param_spec_object ("settings",
-                         "Settings",
-                         "The Application Settings",
-                         GUSL_TYPE_SETTINGS,
-                         G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+      g_param_spec_object ("settings",
+                           "Settings",
+                           "The Application Settings",
+                           GUSL_TYPE_SETTINGS,
+                           G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, N_PROPS, properties);
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/singlerr/gusl/"
-                                               "ui/gusl-window.ui");
+                                               "ui/startup-window.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, GuslWindow, menu_button);
+  gtk_widget_class_bind_template_callback_full (widget_class, "open_shader_clicked", G_CALLBACK (open_shader_clicked));
+  // gtk_widget_class_bind_template_child (widget_class, GuslWindow, main_stack);
+  // gtk_widget_class_bind_template_child (widget_class, GuslWindow, menu_button);
 
-  gtk_widget_class_install_action (widget_class, "win.about", NULL,
-                                   (GtkWidgetActionActivateFunc)gusl_window_show_about);
+  // gtk_widget_class_install_action (widget_class, "win.about", NULL, (GtkWidgetActionActivateFunc)gusl_window_show_about);
 }
 
 static void
@@ -192,13 +257,15 @@ gusl_window_init (GuslWindow *self)
 
 GtkWidget *
 gusl_window_new (GtkApplication *application,
-                GuslSettings    *settings)
+                 GuslSettings *settings)
 {
   g_assert (GTK_IS_APPLICATION (application));
   g_assert (GUSL_IS_SETTINGS (settings));
 
   return g_object_new (GUSL_TYPE_WINDOW,
-                       "application", application,
-                       "settings", settings,
+                       "application",
+                       application,
+                       "settings",
+                       settings,
                        NULL);
 }

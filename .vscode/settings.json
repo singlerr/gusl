@@ -1,5 +1,8 @@
 {
     "mesonbuild.configureOnOpen": true,
     "C_Cpp.default.compileCommands": "/home/archlinux/Projects/gusl/builddir/compile_commands.json",
-    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
+    "files.associations": {
+        "gi18n.h": "c"
+    }
 }

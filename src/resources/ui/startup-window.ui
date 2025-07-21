@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <template class="GuslWindow" parent="AdwApplicationWindow">
+    <property name="title">Shader Editor</property>
+    <property name="default-width">800</property>
+    <property name="default-height">600</property>
+    <property name="resizable">true</property>
+
+    <child>
+      <object class="AdwToolbarView" id="toolbar_view">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
+                <property name="title">Shader Editor</property>
+              </object>
+            </property>
+
+            <child type="end">
+              <object class="GtkMenuButton" id="menu_button">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text">Main Menu</property>
+                <property name="primary">true</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <property name="content">
+          <object class="GtkBox" id="main_box">
+            <property name="orientation">vertical</property>
+            <property name="spacing">0</property>
+            <property name="homogeneous">false</property>
+
+            <!-- Welcome Section -->
+            <child>
+              <object class="GtkBox" id="welcome_box">
+                <property name="orientation">vertical</property>
+                <property name="spacing">32</property>
+                <property name="margin-top">64</property>
+                <property name="margin-bottom">32</property>
+                <property name="margin-start">32</property>
+                <property name="margin-end">32</property>
+                <property name="halign">center</property>
+                <property name="valign">center</property>
+                <property name="vexpand">true</property>
+
+                <child>
+                  <object class="GtkBox" id="title_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">16</property>
+                    <property name="halign">center</property>
+
+                    <child>
+                      <object class="GtkImage" id="app_icon">
+                        <property name="icon-name">applications-graphics-symbolic</property>
+                        <property name="pixel-size">64</property>
+                        <property name="margin-bottom">8</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkLabel" id="app_title">
+                        <property name="label">Shader Editor</property>
+                        <property name="css-classes">title-1</property>
+                        <property name="halign">center</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkLabel" id="app_subtitle">
+                        <property name="label">Create and visualize shader node graphs</property>
+                        <property name="css-classes">subtitle-1</property>
+                        <property name="halign">center</property>
+                        <property name="opacity">0.7</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <!-- Action Buttons -->
+                <child>
+                  <object class="GtkBox" id="action_box">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="halign">center</property>
+                    <property name="width-request">300</property>
+
+                    <child>
+                      <object class="GtkButton" id="open_file_button">
+                        <signal name="clicked" handler="open_shader_clicked" swapped="no" />
+                        <property name="label">Open Shader File</property>
+                        <property name="css-classes">suggested-action pill</property>
+                        <property name="height-request">48</property>
+                        <property name="halign">fill</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">8</property>
+                            <property name="halign">center</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">document-open-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">Open File</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkButton" id="create_new_button">
+                        <property name="label">Create New Shader</property>
+                        <property name="css-classes">pill</property>
+                        <property name="height-request">48</property>
+                        <property name="halign">fill</property>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="spacing">8</property>
+                            <property name="halign">center</property>
+                            <child>
+                              <object class="GtkImage">
+                                <property name="icon-name">document-new-symbolic</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">New Shader</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <!-- Recent Files Section -->
+            <child>
+              <object class="GtkBox" id="recent_section">
+                <property name="orientation">vertical</property>
+                <property name="spacing">16</property>
+                <property name="margin-top">32</property>
+                <property name="margin-bottom">32</property>
+                <property name="margin-start">32</property>
+                <property name="margin-end">32</property>
+
+                <child>
+                  <object class="GtkLabel" id="recent_title">
+                    <property name="label">Recent Files</property>
+                    <property name="css-classes">heading</property>
+                    <property name="halign">start</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkScrolledWindow" id="recent_scroll">
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="vscrollbar-policy">automatic</property>
+                    <property name="max-content-height">200</property>
+                    <property name="propagate-natural-height">true</property>
+
+                    <child>
+                      <object class="GtkListBox" id="recent_list">
+                        <property name="css-classes">boxed-list</property>
+                        <property name="selection-mode">none</property>
+
+                        <!-- Example recent file entries -->
+                        <child>
+                          <object class="GtkListBoxRow" id="recent_row_1">
+                            <property name="activatable">true</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">12</property>
+                                <property name="margin-top">12</property>
+                                <property name="margin-bottom">12</property>
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">text-x-generic-symbolic</property>
+                                    <property name="pixel-size">32</property>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">4</property>
+                                    <property name="hexpand">true</property>
+                                    <property name="halign">start</property>
+
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label">water_shader.glsl</property>
+                                        <property name="css-classes">heading</property>
+                                        <property name="halign">start</property>
+                                      </object>
+                                    </child>
+
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label">/home/user/projects/shaders/</property>
+                                        <property name="css-classes">dim-label caption</property>
+                                        <property name="halign">start</property>
+                                        <property name="ellipsize">middle</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label">2 days ago</property>
+                                    <property name="css-classes">dim-label caption</property>
+                                    <property name="halign">end</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkListBoxRow" id="recent_row_2">
+                            <property name="activatable">true</property>
+                            <child>
+                              <object class="GtkBox">
+                                <property name="spacing">12</property>
+                                <property name="margin-top">12</property>
+                                <property name="margin-bottom">12</property>
+                                <property name="margin-start">12</property>
+                                <property name="margin-end">12</property>
+
+                                <child>
+                                  <object class="GtkImage">
+                                    <property name="icon-name">package-x-generic-symbolic</property>
+                                    <property name="pixel-size">32</property>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">vertical</property>
+                                    <property name="spacing">4</property>
+                                    <property name="hexpand">true</property>
+                                    <property name="halign">start</property>
+
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label">lighting_effects.zip</property>
+                                        <property name="css-classes">heading</property>
+                                        <property name="halign">start</property>
+                                      </object>
+                                    </child>
+
+                                    <child>
+                                      <object class="GtkLabel">
+                                        <property name="label">/home/user/downloads/</property>
+                                        <property name="css-classes">dim-label caption</property>
+                                        <property name="halign">start</property>
+                                        <property name="ellipsize">middle</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkLabel">
+                                    <property name="label">1 week ago</property>
+                                    <property name="css-classes">dim-label caption</property>
+                                    <property name="halign">end</property>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

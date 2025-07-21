@@ -1,0 +1,707 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0" />
+  <requires lib="libadwaita" version="1.0" />
+
+  <template class="EditorWindow" parent="AdwApplicationWindow">
+    <property name="title">Shader Editor - Untitled</property>
+    <property name="default-width">1200</property>
+    <property name="default-height">800</property>
+    <property name="resizable">true</property>
+
+    <child>
+      <object class="AdwToolbarView" id="toolbar_view">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle" id="window_title">
+                <property name="title">Shader Editor</property>
+                <property name="subtitle">water_shader.glsl</property>
+              </object>
+            </property>
+
+            <child type="start">
+              <object class="GtkButton" id="back_button">
+                <property name="icon-name">go-previous-symbolic</property>
+                <property name="tooltip-text">Back to Start</property>
+              </object>
+            </child>
+
+            <child type="start">
+              <object class="GtkSeparator">
+                <property name="orientation">vertical</property>
+                <property name="margin-top">8</property>
+                <property name="margin-bottom">8</property>
+              </object>
+            </child>
+
+            <child type="start">
+              <object class="GtkButton" id="save_button">
+                <property name="icon-name">document-save-symbolic</property>
+                <property name="tooltip-text">Save</property>
+                <property name="css-classes">suggested-action</property>
+              </object>
+            </child>
+
+            <child type="start">
+              <object class="GtkButton" id="export_button">
+                <property name="icon-name">document-send-symbolic</property>
+                <property name="tooltip-text">Export</property>
+              </object>
+            </child>
+
+            <child type="end">
+              <object class="GtkMenuButton" id="menu_button">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text">Main Menu</property>
+                <property name="primary">true</property>
+              </object>
+            </child>
+
+            <child type="end">
+              <object class="GtkToggleButton" id="preview_toggle">
+                <property name="icon-name">view-reveal-symbolic</property>
+                <property name="tooltip-text">Toggle Preview</property>
+              </object>
+            </child>
+
+            <child type="end">
+              <object class="GtkButton" id="compile_button">
+                <property name="icon-name">system-run-symbolic</property>
+                <property name="tooltip-text">Compile Shader</property>
+              </object>
+            </child>
+          </object>
+        </child>
+
+        <property name="content">
+          <object class="GtkBox" id="main_container">
+            <property name="orientation">horizontal</property>
+            <property name="spacing">0</property>
+            <property name="homogeneous">false</property>
+
+            <!-- Left Sidebar -->
+            <child>
+              <object class="GtkBox" id="left_sidebar">
+                <property name="orientation">vertical</property>
+                <property name="width-request">280</property>
+                <property name="css-classes">sidebar</property>
+
+                <child>
+                  <object class="AdwHeaderBar" id="sidebar_header">
+                    <property name="title-widget">
+                      <object class="AdwWindowTitle">
+                        <property name="title">Properties</property>
+                      </object>
+                    </property>
+                    <property name="show-end-title-buttons">false</property>
+                    <property name="show-start-title-buttons">false</property>
+                    <property name="css-classes">flat</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkScrolledWindow" id="properties_scroll">
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="vscrollbar-policy">automatic</property>
+                    <property name="vexpand">true</property>
+
+                    <child>
+                      <object class="GtkBox" id="properties_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">16</property>
+                        <property name="margin-top">16</property>
+                        <property name="margin-bottom">16</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+
+                        <!-- Shader Info Group -->
+                        <child>
+                          <object class="AdwPreferencesGroup" id="shader_info_group">
+                            <property name="title">Shader Information</property>
+
+                            <child>
+                              <object class="AdwActionRow" id="shader_type_row">
+                                <property name="title">Type</property>
+                                <property name="subtitle">Fragment Shader</property>
+                                <property name="icon-name">applications-graphics-symbolic</property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwActionRow" id="shader_version_row">
+                                <property name="title">Version</property>
+                                <property name="subtitle">GLSL 4.50</property>
+                                <property name="icon-name">dialog-information-symbolic</property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwActionRow" id="node_count_row">
+                                <property name="title">Nodes</property>
+                                <property name="subtitle">12 nodes</property>
+                                <property name="icon-name">view-grid-symbolic</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <!-- Node Properties Group -->
+                        <child>
+                          <object class="AdwPreferencesGroup" id="node_properties_group">
+                            <property name="title">Selected Node</property>
+
+                            <child>
+                              <object class="AdwEntryRow" id="node_name_entry">
+                                <property name="title">Name</property>
+                                <property name="text">MainTexture</property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwComboRow" id="node_type_combo">
+                                <property name="title">Type</property>
+                                <property name="subtitle">Texture2D</property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwSwitchRow" id="node_enabled_switch">
+                                <property name="title">Enabled</property>
+                                <property name="active">true</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <!-- Parameters Group -->
+                        <child>
+                          <object class="AdwPreferencesGroup" id="parameters_group">
+                            <property name="title">Parameters</property>
+
+                            <child>
+                              <object class="AdwSpinRow" id="intensity_spin">
+                                <property name="title">Intensity</property>
+                                <property name="value">1.0</property>
+                                <property name="adjustment">
+                                  <object class="GtkAdjustment">
+                                    <property name="lower">0.0</property>
+                                    <property name="upper">10.0</property>
+                                    <property name="step-increment">0.1</property>
+                                    <property name="page-increment">1.0</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+
+                            <child>
+                              <object class="AdwSpinRow" id="scale_spin">
+                                <property name="title">Scale</property>
+                                <property name="value">1.0</property>
+                                <property name="adjustment">
+                                  <object class="GtkAdjustment">
+                                    <property name="lower">0.1</property>
+                                    <property name="upper">5.0</property>
+                                    <property name="step-increment">0.1</property>
+                                    <property name="page-increment">0.5</property>
+                                  </object>
+                                </property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <!-- Main Editor Area -->
+            <child>
+              <object class="GtkBox" id="editor_area">
+                <property name="orientation">vertical</property>
+                <property name="hexpand">true</property>
+                <property name="vexpand">true</property>
+
+                <!-- Blueprint Canvas Container -->
+                <child>
+                  <object class="GtkFrame" id="canvas_frame">
+                    <property name="css-classes">view</property>
+                    <property name="vexpand">true</property>
+                    <property name="hexpand">true</property>
+
+                    <child>
+                      <object class="GtkScrolledWindow" id="canvas_scroll">
+                        <property name="hscrollbar-policy">automatic</property>
+                        <property name="vscrollbar-policy">automatic</property>
+                        <property name="kinetic-scrolling">true</property>
+
+                        <child>
+                          <object class="GtkDrawingArea" id="blueprint_canvas">
+                            <property name="content-width">2000</property>
+                            <property name="content-height">2000</property>
+                            <property name="halign">center</property>
+                            <property name="valign">center</property>
+                            <property name="css-classes">blueprint-canvas</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
+                <!-- Bottom Status Bar -->
+                <child>
+                  <object class="GtkBox" id="status_bar">
+                    <property name="orientation">horizontal</property>
+                    <property name="spacing">12</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                    <property name="css-classes">toolbar</property>
+
+                    <child>
+                      <object class="GtkLabel" id="status_label">
+                        <property name="label">Ready</property>
+                        <property name="css-classes">dim-label</property>
+                        <property name="halign">start</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkSeparator">
+                        <property name="orientation">vertical</property>
+                        <property name="margin-top">4</property>
+                        <property name="margin-bottom">4</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkLabel" id="zoom_label">
+                        <property name="label">Zoom: 100%</property>
+                        <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkBox" id="zoom_controls">
+                        <property name="spacing">4</property>
+                        <property name="halign">end</property>
+                        <property name="hexpand">true</property>
+
+                        <child>
+                          <object class="GtkButton" id="zoom_out_button">
+                            <property name="icon-name">zoom-out-symbolic</property>
+                            <property name="tooltip-text">Zoom Out</property>
+                            <property name="css-classes">flat</property>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkButton" id="zoom_fit_button">
+                            <property name="icon-name">zoom-fit-best-symbolic</property>
+                            <property name="tooltip-text">Fit to Window</property>
+                            <property name="css-classes">flat</property>
+                          </object>
+                        </child>
+
+                        <child>
+                          <object class="GtkButton" id="zoom_in_button">
+                            <property name="icon-name">zoom-in-symbolic</property>
+                            <property name="tooltip-text">Zoom In</property>
+                            <property name="css-classes">flat</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+
+            <!-- Right Sidebar (Node Library) -->
+            <child>
+              <object class="GtkBox" id="right_sidebar">
+                <property name="orientation">vertical</property>
+                <property name="width-request">280</property>
+                <property name="css-classes">sidebar</property>
+
+                <child>
+                  <object class="AdwHeaderBar" id="node_library_header">
+                    <property name="title-widget">
+                      <object class="AdwWindowTitle">
+                        <property name="title">Node Library</property>
+                      </object>
+                    </property>
+                    <property name="show-end-title-buttons">false</property>
+                    <property name="show-start-title-buttons">false</property>
+                    <property name="css-classes">flat</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkSearchEntry" id="node_search">
+                    <property name="placeholder-text">Search nodes...</property>
+                    <property name="margin-top">8</property>
+                    <property name="margin-bottom">8</property>
+                    <property name="margin-start">16</property>
+                    <property name="margin-end">16</property>
+                  </object>
+                </child>
+
+                <child>
+                  <object class="GtkScrolledWindow" id="node_library_scroll">
+                    <property name="hscrollbar-policy">never</property>
+                    <property name="vscrollbar-policy">automatic</property>
+                    <property name="vexpand">true</property>
+
+                    <child>
+                      <object class="GtkBox" id="node_library_box">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">8</property>
+                        <property name="margin-top">8</property>
+                        <property name="margin-bottom">16</property>
+                        <property name="margin-start">16</property>
+                        <property name="margin-end">16</property>
+
+                        <!-- Input Nodes Category -->
+                        <child>
+                          <object class="AdwExpanderRow" id="input_nodes_expander">
+                            <property name="title">Input Nodes</property>
+                            <property name="expanded">true</property>
+                            <property name="icon-name">go-down-symbolic</property>
+
+                            <child>
+                              <object class="GtkListBox" id="input_nodes_list">
+                                <property name="css-classes">boxed-list</property>
+                                <property name="selection-mode">none</property>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">image-x-generic-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Texture2D</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">input-gaming-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">UV Coordinates</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <!-- Math Nodes Category -->
+                        <child>
+                          <object class="AdwExpanderRow" id="math_nodes_expander">
+                            <property name="title">Math Nodes</property>
+                            <property name="expanded">true</property>
+                            <property name="icon-name">go-down-symbolic</property>
+
+                            <child>
+                              <object class="GtkListBox" id="math_nodes_list">
+                                <property name="css-classes">boxed-list</property>
+                                <property name="selection-mode">none</property>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">
+                                              accessories-calculator-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Add</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">
+                                              accessories-calculator-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Multiply</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">
+                                              accessories-calculator-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Normalize</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <!-- Effect Nodes Category -->
+                        <child>
+                          <object class="AdwExpanderRow" id="effect_nodes_expander">
+                            <property name="title">Effect Nodes</property>
+                            <property name="expanded">false</property>
+                            <property name="icon-name">go-next-symbolic</property>
+
+                            <child>
+                              <object class="GtkListBox" id="effect_nodes_list">
+                                <property name="css-classes">boxed-list</property>
+                                <property name="selection-mode">none</property>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">image-filter-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Blur</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">weather-clear-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Lighting</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+
+                        <!-- Output Nodes Category -->
+                        <child>
+                          <object class="AdwExpanderRow" id="output_nodes_expander">
+                            <property name="title">Output Nodes</property>
+                            <property name="expanded">true</property>
+                            <property name="icon-name">go-down-symbolic</property>
+
+                            <child>
+                              <object class="GtkListBox" id="output_nodes_list">
+                                <property name="css-classes">boxed-list</property>
+                                <property name="selection-mode">none</property>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">media-record-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Fragment Output</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+
+                                <child>
+                                  <object class="GtkListBoxRow">
+                                    <property name="activatable">true</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="spacing">8</property>
+                                        <property name="margin-top">8</property>
+                                        <property name="margin-bottom">8</property>
+                                        <property name="margin-start">12</property>
+                                        <property name="margin-end">12</property>
+
+                                        <child>
+                                          <object class="GtkImage">
+                                            <property name="icon-name">view-reveal-symbolic</property>
+                                          </object>
+                                        </child>
+
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Preview</property>
+                                            <property name="halign">start</property>
+                                            <property name="hexpand">true</property>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+      </object>
+    </child>
+  </template>
+</interface>

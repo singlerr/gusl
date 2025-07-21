@@ -29,12 +29,12 @@
 #include <libintl.h>
 #include <locale.h>
 
-#include "gusl-utils.h"
 #include "gusl-application.h"
 #include "gusl-log.h"
+#include "gusl-utils.h"
 
 int
-main (int   argc,
+main (int argc,
       char *argv[])
 {
   g_autoptr(GuslApplication) application = NULL;
