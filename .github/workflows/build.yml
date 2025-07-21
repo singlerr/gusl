@@ -28,7 +28,9 @@ jobs:
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-build-gtk4
-
+      - name: Install extra packages
+        run: |
+          sudo dnf install flex bison -y
       - name: Build, Test, and Generate Coverage
         run: |
           CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
