@@ -1,53 +1,77 @@
-stages:
-  - build
-  - test
-  - deploy
+name: Build and Deploy
 
-build:
-  image: pksadiq/gtk:fedora-amd64
-  stage: build
-  variables:
-    CCACHE_DIR: "${CI_PROJECT_DIR}/_ccache"
-    MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
-  script:
-    - CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
-    - ccache --zero-stats
-    - ninja -C _build && xvfb-run -a meson test -C _build
-    - ccache --show-stats
-    - mkdir -p _build/meson-logs/coveragereport
-    - gcovr --root=_build --html-details --print-summary
-      --filter=. --exclude=.*gtkapplication.h --exclude=.*src/resources.c --exclude=.*autocleanups.h
-      -o _build/meson-logs/coveragereport/index.html
-  coverage: '/^lines:.*\s+(\S+\%).*$/'
-  cache:
-    key: build-gtk4
+on:
+  push:
     paths:
-      - _ccache/
-  artifacts:
-    when: always
-    paths:
-      - _build
-  only:
-    changes:
-      - data/*
-      - docs/*
-      - src/*
-      - tests/*
-      - meson*
-      - .gitlab-ci.yml
+      - 'data/**'
+      - 'docs/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'meson*'
+      - '.github/workflows/**'
 
-pages:
-  image: busybox:1
-  stage: deploy
-  script:
-    - mkdir public
-    - mv _build/meson-logs/coveragereport ${CI_PROJECT_DIR}/public/coverage
-  artifacts:
-    paths:
-      - public
-  only:
-    - master
-  only:
-    changes:
-      - docs/*
-      - src/*
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    container: pksadiq/gtk:fedora-amd64
+    env:
+      CCACHE_DIR: "${{ github.workspace }}/_ccache"
+      MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ runner.os }}-build-gtk4
+
+      - name: Build, Test, and Generate Coverage
+        run: |
+          CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
+          ccache --zero-stats
+          ninja -C _build && xvfb-run -a meson test -C _build
+          ccache --show-stats
+          mkdir -p _build/meson-logs/coveragereport
+          gcovr --root=_build --html-details --print-summary \
+            --filter=. --exclude=.*gtkapplication.h --exclude=.*src/resources.c --exclude=.*autocleanups.h \
+            -o _build/meson-logs/coveragereport/index.html
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: _build/
+
+  deploy-pages:
+    name: Deploy Coverage to Pages
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: _build/
+
+      - name: Prepare Pages directory
+        run: |
+          mkdir -p public/coverage
+          mv _build/meson-logs/coveragereport/* public/coverage/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'public'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
