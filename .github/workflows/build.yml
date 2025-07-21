@@ -13,7 +13,6 @@ on:
 jobs:
   build:
     name: Build and Test
-    needs: gtknodes
     runs-on: ubuntu-latest
     container: pksadiq/gtk:fedora-amd64
     env:
