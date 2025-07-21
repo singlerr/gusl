@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Install dependencies
         run:
-          sudo dnf install git gobject-introspection gtk-doc libtool -y
+          sudo dnf install -y gobject-introspection gtk-doc libtool
           git clone https://github.com/aluntzer/gtknodes.git
           cd gtknodes
           sh autogen.sh
