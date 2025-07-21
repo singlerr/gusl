@@ -14,22 +14,13 @@ jobs:
   build:
     name: Build and Test
     runs-on: ubuntu-latest
-    container: pksadiq/gtk:fedora-amd64
+    using: 'docker'
+    image: 'Dockerfile'
     env:
       CCACHE_DIR: "${{ github.workspace }}/_ccache"
       MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
 
     steps:
-      - name: Install dependencies
-        run:
-          sudo dnf install -y gobject-introspection gtk-doc libtool
-          git clone https://github.com/aluntzer/gtknodes.git
-          cd gtknodes
-          sh autogen.sh
-          ./configure
-          make
-          make install
-          cd ..
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Cache ccache
@@ -37,9 +28,6 @@ jobs:
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-build-gtk4
-      - name: Install extra packages
-        run: |
-          sudo dnf install flex bison cmake -y
       - name: Build, Test, and Generate Coverage
         run: |
           CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
