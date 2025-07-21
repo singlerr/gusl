@@ -13,13 +13,11 @@ on:
 jobs:
   build:
     name: Build and Test
-    runs-on: ubuntu-latest
     using: 'docker'
     image: 'Dockerfile'
     env:
       CCACHE_DIR: "${{ github.workspace }}/_ccache"
       MESON_ARGS: "--buildtype=debugoptimized -Dhelp=true -Dgtk_doc=true -Dbash_completion=false"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
