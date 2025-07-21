@@ -11,8 +11,19 @@ on:
       - '.github/workflows/**'
 
 jobs:
+  gtknodes:
+    name: Install gtknodes
+    run: |
+      sudo dnf install git gobject-introspection gtk-doc libtool -y
+      git clone https://github.com/aluntzer/gtknodes.git
+      cd gtknodes
+      sh autogen.sh
+      ./configure
+      make
+      make install
   build:
     name: Build and Test
+    needs: gtknodes
     runs-on: ubuntu-latest
     container: pksadiq/gtk:fedora-amd64
     env:
@@ -30,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-build-gtk4
       - name: Install extra packages
         run: |
-          sudo dnf install flex bison -y
+          sudo dnf install flex bison cmake -y
       - name: Build, Test, and Generate Coverage
         run: |
           CC_LD=mold meson ${MESON_ARGS} -Db_coverage=true _build
