@@ -32,6 +32,7 @@
 
 #include "editor-window.h"
 #include "gusl-log.h"
+#include "gusl-utils.h"
 #include "gusl-window.h"
 
 #include <string.h>
@@ -47,7 +48,7 @@ struct _GuslWindow
 
 G_DEFINE_TYPE (GuslWindow, gusl_window, ADW_TYPE_APPLICATION_WINDOW)
 
-static const char *allowed_content_types[] = { "application/zip", "text/x-matlab" };
+static const char *allowed_content_types[] = { "application/zip", "text/x-matlab", "text/plain" };
 
 enum {
   PROP_0,
@@ -56,7 +57,7 @@ enum {
 };
 
 static GParamSpec *properties[N_PROPS];
-
+bool check_content_type (GFileInfo *meta);
 void
 on_shader_open_response (GObject *source, GAsyncResult *result, gpointer user_data);
 void
@@ -86,18 +87,43 @@ on_shader_open_response (GObject *source, GAsyncResult *result, gpointer user_da
 
       if (g_file_info_has_attribute (metadata, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE))
         {
-          g_object_unref (metadata);
-          open_editor_window (win, path);
-          gtk_window_destroy (GTK_WINDOW (win));
+          if (check_content_type (metadata))
+            {
+              g_object_unref (metadata);
+              open_editor_window (win, path);
+              gtk_window_destroy (GTK_WINDOW (win));
+            }
+          else
+            {
+              AdwAlertDialog *alert = adw_alert_dialog_new_ok (_ ("Error"), _ ("Only shader pack files or single glsl file supported"), ADW_DESTROY_DIALOG);
+              adw_dialog_present (ADW_DIALOG (alert), GTK_WIDGET (win));
+            }
         }
 
       g_object_unref (file);
     }
   else if (error)
     {
-      g_printerr ("File open error: %s\n", error->message);
+      g_error ("File open error: %s\n", error->message);
       g_clear_error (&error);
     }
+}
+
+bool
+check_content_type (GFileInfo *meta)
+{
+  const char *type = g_file_info_get_content_type (meta);
+  size_t s = sizeof (allowed_content_types) / sizeof (allowed_content_types[0]);
+  for (size_t i = 0; i < s; i++)
+    {
+      if (strcmp (type, allowed_content_types[i]) == 0)
+        {
+          return true;
+        }
+    }
+
+
+  return false;
 }
 
 void

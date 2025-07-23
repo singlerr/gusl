@@ -41,8 +41,14 @@ struct _EditorWindow
 
 G_DEFINE_TYPE (EditorWindow, editor_window, ADW_TYPE_APPLICATION_WINDOW)
 
-bool editor_check_content_type (GFileInfo *meta);
+
 void editor_setup (gchar *path);
+
+void
+editor_setup (gchar *path)
+{
+  GFile *file = g_file_new_for_path (path);
+}
 
 static void
 editor_window_constructed (GObject *object)

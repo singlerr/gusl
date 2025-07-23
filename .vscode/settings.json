@@ -3,6 +3,15 @@
     "C_Cpp.default.compileCommands": "/home/archlinux/Projects/gusl/builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
     "files.associations": {
-        "gi18n.h": "c"
+        "gi18n.h": "c",
+        "gusl-window.h": "c",
+        "glib.h": "c",
+        "editor-window.h": "c",
+        "config.h": "c",
+        "shader_source.h": "c",
+        "version.h": "c",
+        "gusl-log.h": "c",
+        "ranges": "c",
+        "cstdlib": "c"
     }
 }

@@ -28,6 +28,7 @@
 #endif
 
 #include "gusl-utils.h"
+#include <glib/gi18n.h>
 
 /**
  * SECTION: gusl-utils
@@ -60,4 +61,52 @@ gusl_utils_get_main_thread (void)
     main_thread = g_thread_self ();
 
   return main_thread;
+}
+
+AdwAlertDialog *
+adw_alert_dialog_new_yes_or_no (const char *title, const char *body, GCallback yes_callback, GCallback no_callback)
+{
+  AdwDialog *dialog = adw_alert_dialog_new (title, body);
+  adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog), "yes", _ ("Yes"), "no", _ ("No"), NULL);
+  adw_alert_dialog_set_response_appearance (ADW_ALERT_DIALOG (dialog), "yes", ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_response_appearance (ADW_ALERT_DIALOG (dialog), "no", ADW_RESPONSE_DESTRUCTIVE);
+  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "no");
+  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "no");
+
+  if (yes_callback)
+    {
+      g_signal_connect (dialog, "yes", yes_callback, NULL);
+    }
+
+  if (no_callback)
+    {
+      g_signal_connect (dialog, "no", no_callback, NULL);
+    }
+
+  return ADW_ALERT_DIALOG (dialog);
+}
+
+AdwAlertDialog *
+adw_alert_dialog_new_ok (const char *title, const char *body, GCallback ok_callback)
+{
+  AdwDialog *dialog = adw_alert_dialog_new (title, body);
+  adw_alert_dialog_add_responses (ADW_ALERT_DIALOG (dialog), "ok", _ ("OK"), NULL);
+  adw_alert_dialog_set_response_appearance (ADW_ALERT_DIALOG (dialog), "ok", ADW_RESPONSE_SUGGESTED);
+  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "ok");
+  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "ok");
+
+  if (ok_callback)
+    {
+      g_signal_connect (dialog, "ok", ok_callback, NULL);
+    }
+
+  return ADW_ALERT_DIALOG (dialog);
+}
+
+void
+_adw_destroy_dialog (AdwAlertDialog *dialog,
+                     GAsyncResult *result)
+{
+  adw_alert_dialog_choose_finish (dialog, result);
+  g_object_unref (dialog);
 }

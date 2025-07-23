@@ -55,6 +55,7 @@ libsrc = [
   'gusl-settings.c',
   'gusl-window.c',
   'editor-window.c',
+  'shader_source.c',
 ]
 
 libgusl_shared = shared_library(
