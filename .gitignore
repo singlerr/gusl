@@ -30,3 +30,5 @@ CTAGS
 GTAGS
 GRTAGS
 GPATH
+
+.vscode/settings.json
