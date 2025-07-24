@@ -32,6 +32,7 @@
 
 #include "editor-window.h"
 #include "gusl-log.h"
+#include "shader_source.h"
 
 struct _EditorWindow
 {
@@ -47,6 +48,7 @@ void editor_setup (gchar *path);
 void
 editor_setup (gchar *path)
 {
+
   GFile *file = g_file_new_for_path (path);
 }
 

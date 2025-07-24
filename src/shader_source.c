@@ -21,18 +21,15 @@ struct _ShaderFile
 
 struct _ShaderPack
 {
-  char *contents[CONTENT_MAX];
+  int count;
+  ShaderFile *files;
 };
 
 struct _ShaderSource
 {
   ShaderType type;
   char path[PATH_MAX];
-
-  union _source {
-    ShaderFile *file;
-    ShaderPack *pack;
-  } source;
+  ShaderPack content;
 };
 
 struct _ShaderResolver
@@ -47,8 +44,8 @@ struct _ShaderResolver _shader_resolvers[] = {
   { .type_name = "text/x-matlab", .type = SHADER_TYPE_FILE }
 };
 
-ShaderFile *shader_file_new (GFile *file);
-ShaderPack *shader_pack_new (GFile *file);
+void shader_file_new (GFile *file, GFileInfo *info, ShaderFile *out);
+void shader_pack_new (GFile *file, GFileInfo *info, ShaderPack *out);
 
 ShaderSource *
 shader_source_new (const char *path)
@@ -101,37 +98,55 @@ shader_source_new (const char *path)
       return NULL;
     }
 
-  shader_source = (ShaderSource *)g_malloc (sizeof (ShaderSource));
+  shader_source = g_new (ShaderSource, 1);
 
   strcpy (shader_source->path, path);
   shader_source->type = loader->type;
-
-  switch (loader->type)
-    {
-    case SHADER_TYPE_FILE:
-      shader_source->source.file = shader_file_new (file);
-      break;
-    case SHADER_TYPE_PACK:
-      shader_source->source.pack = shader_pack_new (file);
-      break;
-    default:
-      break;
-    }
-
-  g_object_unref (file);
-  g_object_unref (file_info);
-
+  // TODO: for single shader file, create psuedo shader pack and its content is only that file, for archive file, create shader pack
   return shader_source;
 }
 
-ShaderFile *
-shader_file_new (GFile *file)
+struct _AsyncData
 {
+  GFile *file;
+  GFileInfo *info;
+  char **contents;
+};
+
+void
+shader_async_read_text (GObject *source_object,
+                        GAsyncResult *res,
+                        gpointer data)
+{
+  struct _AsyncData *params = (struct _AsyncData *)data;
+  GError *err = NULL;
+  GFileInputStream *ins = g_file_read_finish (params->file, res, err);
+  if (!ins)
+    {
+      g_error ("Could not read contents for %s\n", g_file_get_path (params->file));
+      goto cleanup;
+    }
+
+  g_file_input_stream_query_info ();
+  g_input_stream_read_all (ins, );
+cleanup:
+  g_object_unref (params->file);
+  g_object_unref (params);
+  g_clear_error (err);
+}
+
+void
+shader_file_new (GFile *file, GFileInfo *info, ShaderFile *out)
+{
+  struct _AsyncData *params = g_new (struct _AsyncData, 1);
+  params->file = file;
+  params->contents = &out->content;
+  g_file_read_async (file, G_PRIORITY_DEFAULT, NULL, G_CALLBACK (shader_async_read_text), params);
   return NULL;
 }
 
-ShaderPack *
-shader_pack_new (GFile *file)
+void
+shader_pack_new (GFile *file, ShaderPack *out)
 {
   g_autofree gchar *path = g_file_get_path (file);
   int err;
