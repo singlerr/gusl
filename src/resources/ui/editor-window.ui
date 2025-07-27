@@ -251,6 +251,73 @@
                   </object>
                 </child>
 
+                <!-- Program Log Panel -->
+                <child>
+                  <object class="GtkRevealer" id="log_revealer">
+                    <property name="reveal-child">false</property>
+                    <property name="transition-type">slide-up</property>
+                    <property name="transition-duration">200</property>
+                    
+                    <child>
+                      <object class="GtkBox" id="log_panel">
+                        <property name="orientation">vertical</property>
+                        <property name="height-request">200</property>
+                        <property name="css-classes">view</property>
+                        
+                        <child>
+                          <object class="AdwHeaderBar" id="log_header">
+                            <property name="title-widget">
+                              <object class="AdwWindowTitle">
+                                <property name="title">Program Log</property>
+                              </object>
+                            </property>
+                            <property name="show-end-title-buttons">false</property>
+                            <property name="show-start-title-buttons">false</property>
+                            <property name="css-classes">flat</property>
+                            
+                            <child type="end">
+                              <object class="GtkButton" id="log_clear_button">
+                                <property name="icon-name">user-trash-symbolic</property>
+                                <property name="tooltip-text">Clear Log</property>
+                                <property name="css-classes">flat</property>
+                              </object>
+                            </child>
+                            
+                            <child type="end">
+                              <object class="GtkButton" id="log_close_button">
+                                <property name="icon-name">window-close-symbolic</property>
+                                <property name="tooltip-text">Hide Log</property>
+                                <property name="css-classes">flat</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        
+                        <child>
+                          <object class="GtkScrolledWindow" id="log_scroll">
+                            <property name="hscrollbar-policy">automatic</property>
+                            <property name="vscrollbar-policy">automatic</property>
+                            <property name="vexpand">true</property>
+                            
+                            <child>
+                              <object class="GtkTextView" id="log_text_view">
+                                <property name="editable">false</property>
+                                <property name="cursor-visible">false</property>
+                                <property name="monospace">true</property>
+                                <property name="css-classes">monospace</property>
+                                <property name="margin-top">8</property>
+                                <property name="margin-bottom">8</property>
+                                <property name="margin-start">8</property>
+                                <property name="margin-end">8</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+
                 <!-- Bottom Status Bar -->
                 <child>
                   <object class="GtkBox" id="status_bar">
@@ -282,6 +349,22 @@
                       <object class="GtkLabel" id="zoom_label">
                         <property name="label">Zoom: 100%</property>
                         <property name="css-classes">dim-label</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkSeparator">
+                        <property name="orientation">vertical</property>
+                        <property name="margin-top">4</property>
+                        <property name="margin-bottom">4</property>
+                      </object>
+                    </child>
+
+                    <child>
+                      <object class="GtkToggleButton" id="log_toggle_button">
+                        <property name="icon-name">utilities-terminal-symbolic</property>
+                        <property name="tooltip-text">Toggle Program Log</property>
+                        <property name="css-classes">flat</property>
                       </object>
                     </child>
 
