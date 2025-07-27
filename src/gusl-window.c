@@ -48,7 +48,7 @@ struct _GuslWindow
 
 G_DEFINE_TYPE (GuslWindow, gusl_window, ADW_TYPE_APPLICATION_WINDOW)
 
-static const char *allowed_content_types[] = { "application/zip", "text/x-matlab", "text/plain" };
+static const char *allowed_content_types[] = { "application/zip", "text/x-matlab", "text/plain", "text/x-csrc" };
 
 enum {
   PROP_0,
@@ -62,6 +62,8 @@ void
 on_shader_open_response (GObject *source, GAsyncResult *result, gpointer user_data);
 void
 open_shader_clicked (GtkButton *button, GuslWindow *win, gpointer user_data);
+
+
 void open_editor_window (GuslWindow *win, gpointer user_data);
 
 void
@@ -269,7 +271,7 @@ gusl_window_class_init (GuslWindowClass *klass)
                                                "ui/startup-window.ui");
 
   gtk_widget_class_bind_template_callback_full (widget_class, "open_shader_clicked", G_CALLBACK (open_shader_clicked));
-  // gtk_widget_class_bind_template_child (widget_class, GuslWindow, main_stack);
+
   // gtk_widget_class_bind_template_child (widget_class, GuslWindow, menu_button);
 
   // gtk_widget_class_install_action (widget_class, "win.about", NULL, (GtkWidgetActionActivateFunc)gusl_window_show_about);

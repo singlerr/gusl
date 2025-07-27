@@ -14,7 +14,8 @@ struct _ShaderResolver
 struct _ShaderResolver _shader_resolvers[] = {
   { .type_name = "application/zip", .type = SHADER_TYPE_PACK },
   { .type_name = "text/plain", .type = SHADER_TYPE_FILE },
-  { .type_name = "text/x-matlab", .type = SHADER_TYPE_FILE }
+  { .type_name = "text/x-matlab", .type = SHADER_TYPE_FILE },
+  { .type_name = "text/x-csrc", .type = SHADER_TYPE_FILE }
 };
 
 ShaderFile *shader_file_new (GFile *file, GFileInfo *info);

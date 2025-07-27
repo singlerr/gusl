@@ -29,6 +29,7 @@
 #endif
 
 #include <glib/gi18n.h>
+#include <time.h>
 
 #include "editor-window.h"
 #include "glsl_parser.h"
@@ -40,11 +41,30 @@ struct _EditorWindow
 {
   AdwApplicationWindow parent_instance;
   GtkWidget *menu_button;
+  GtkWidget *log_revealer;
+  GtkWidget *log_text_view;
 };
+
+typedef enum {
+  LOG_INFO = 0,
+  LOG_ERROR = 1,
+  LOG_DEBUG = 2,
+  LOG_WARN = 3,
+
+  LEVEL_SIZE
+} LogLevel;
+
+static char *level_str[] = { "INFO", "ERROR", "DEBUG", "WARN" };
+
+#define log_info(view, ...)  log_to_view (view, LOG_INFO, __VA_ARGS__)
+#define log_err(view, ...)   log_to_view (view, LOG_ERROR, __VA_ARGS__)
+#define log_debug(view, ...) log_to_view (view, LOG_DEBUG, __VA_ARGS__)
+#define log_warn(view, ...)  log_to_view (view, LOG_WARN, __VA_ARGS__)
 
 G_DEFINE_TYPE (EditorWindow, editor_window, ADW_TYPE_APPLICATION_WINDOW)
 
-
+void log_to_view (GtkTextView *view, LogLevel level, const char *format, ...);
+void toggle_log_panel (GtkButton *button, EditorWindow *win, gpointer user_data);
 void editor_setup (gchar *path, gpointer user_data);
 void error_cb (const char *str, int lineno, int first_col, int last_col, void *user_data);
 void on_shader_load (ShaderSource *src, void *user_data);
@@ -52,12 +72,20 @@ void on_shader_load (ShaderSource *src, void *user_data);
 void
 editor_setup (gchar *path, void *user_data)
 {
+  EditorWindow *win = EDITOR_WINDOW (user_data);
   int ret;
   if ((ret = load_shader_source_async ((const char *)path, on_shader_load, user_data)) < 0)
     {
-      g_error ("Could not load shader file.\n");
+      log_err (GTK_TEXT_VIEW (win->log_text_view), "Could not load shader file.\n");
       return;
     }
+}
+
+void
+toggle_log_panel (GtkButton *button, EditorWindow *win, gpointer user_data)
+{
+  GtkRevealer *revealer = GTK_REVEALER (win->log_revealer);
+  gtk_revealer_set_reveal_child (revealer, !gtk_revealer_get_child_revealed (revealer));
 }
 
 void
@@ -110,6 +138,9 @@ editor_window_class_init (EditorWindowClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/io/github/singlerr/gusl/"
                                                "ui/editor-window.ui");
+  gtk_widget_class_bind_template_callback_full (widget_class, "toggle_log_panel", G_CALLBACK (toggle_log_panel));
+  gtk_widget_class_bind_template_child (widget_class, EditorWindow, log_revealer);
+  gtk_widget_class_bind_template_child (widget_class, EditorWindow, log_text_view);
 }
 
 static void
@@ -136,9 +167,39 @@ void
 error_cb (const char *str, int lineno, int first_col, int last_col, void *user_data)
 {
   GtkWindow *win = GTK_WINDOW (user_data);
+  EditorWindow *editor_win = EDITOR_WINDOW (win);
   g_debug ("GLSL parse error line %d(%d-%d): %s\n", lineno, first_col, last_col, str);
+  log_err (GTK_TEXT_VIEW (editor_win->log_text_view), "GLSL parse error line %d(%d-%d): %s\n", lineno, first_col, last_col, str);
+}
 
-  AdwMessageDialog *dialog = adw_message_dialog_new_ok (win, _ ("Failed to load"), NULL, NULL);
-  adw_message_dialog_format_body (dialog, _ ("GLSL parse error line %d(%d-%d): %s"), lineno, first_col, last_col, str);
-  gtk_window_present (GTK_WINDOW (dialog));
+void
+log_to_view (GtkTextView *view, LogLevel level, const char *format, ...)
+{
+  GtkTextBuffer *tb;
+  time_t t;
+  GtkTextIter start_it, end_it;
+  va_list argptr;
+  va_start (argptr, format);
+  GString *buf = g_string_new (NULL);
+
+  time (&t);
+  if (level >= LOG_INFO && level < LEVEL_SIZE)
+    {
+      g_string_printf (buf, "%s - [%s] ", ctime (&t), level_str[level]);
+    }
+  else
+    {
+      g_error ("Could not determine log level str - out of range\n");
+      g_string_printf (buf, "%s ", ctime (&t));
+    }
+
+
+  g_string_append_vprintf (buf, format, argptr);
+  va_end (argptr);
+
+  tb = gtk_text_view_get_buffer (view);
+  gtk_text_buffer_get_bounds (tb, &start_it, &end_it);
+  gtk_text_buffer_insert (tb, &end_it, buf->str, buf->len);
+
+  g_string_free (buf, TRUE);
 }

@@ -254,16 +254,17 @@
                 <!-- Program Log Panel -->
                 <child>
                   <object class="GtkRevealer" id="log_revealer">
-                    <property name="reveal-child">false</property>
+
+                    <property name="reveal-child">true</property>
                     <property name="transition-type">slide-up</property>
                     <property name="transition-duration">200</property>
-                    
+
                     <child>
                       <object class="GtkBox" id="log_panel">
                         <property name="orientation">vertical</property>
                         <property name="height-request">200</property>
                         <property name="css-classes">view</property>
-                        
+
                         <child>
                           <object class="AdwHeaderBar" id="log_header">
                             <property name="title-widget">
@@ -274,7 +275,7 @@
                             <property name="show-end-title-buttons">false</property>
                             <property name="show-start-title-buttons">false</property>
                             <property name="css-classes">flat</property>
-                            
+
                             <child type="end">
                               <object class="GtkButton" id="log_clear_button">
                                 <property name="icon-name">user-trash-symbolic</property>
@@ -282,7 +283,7 @@
                                 <property name="css-classes">flat</property>
                               </object>
                             </child>
-                            
+
                             <child type="end">
                               <object class="GtkButton" id="log_close_button">
                                 <property name="icon-name">window-close-symbolic</property>
@@ -292,13 +293,13 @@
                             </child>
                           </object>
                         </child>
-                        
+
                         <child>
                           <object class="GtkScrolledWindow" id="log_scroll">
                             <property name="hscrollbar-policy">automatic</property>
                             <property name="vscrollbar-policy">automatic</property>
                             <property name="vexpand">true</property>
-                            
+
                             <child>
                               <object class="GtkTextView" id="log_text_view">
                                 <property name="editable">false</property>
@@ -362,6 +363,7 @@
 
                     <child>
                       <object class="GtkToggleButton" id="log_toggle_button">
+                        <signal name="clicked" handler="toggle_log_panel" swapped="no" />
                         <property name="icon-name">utilities-terminal-symbolic</property>
                         <property name="tooltip-text">Toggle Program Log</property>
                         <property name="css-classes">flat</property>
