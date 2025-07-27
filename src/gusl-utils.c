@@ -103,6 +103,23 @@ adw_alert_dialog_new_ok (const char *title, const char *body, GCallback ok_callb
   return ADW_ALERT_DIALOG (dialog);
 }
 
+AdwMessageDialog *
+adw_message_dialog_new_ok (GtkWindow *parent, const char *title, const char *body, GCallback ok_callback)
+{
+  GtkWidget *dialog = adw_message_dialog_new (parent, title, body);
+  adw_message_dialog_add_responses (ADW_MESSAGE_DIALOG (dialog), "ok", _ ("OK"), NULL);
+  adw_message_dialog_set_response_appearance (ADW_MESSAGE_DIALOG (dialog), "ok", ADW_RESPONSE_SUGGESTED);
+  adw_message_dialog_set_default_response (ADW_MESSAGE_DIALOG (dialog), "ok");
+  adw_message_dialog_set_close_response (ADW_MESSAGE_DIALOG (dialog), "ok");
+
+  if (ok_callback)
+    {
+      g_signal_connect (dialog, "ok", ok_callback, NULL);
+    }
+
+  return ADW_MESSAGE_DIALOG (dialog);
+}
+
 void
 _adw_destroy_dialog (AdwAlertDialog *dialog,
                      GAsyncResult *result)

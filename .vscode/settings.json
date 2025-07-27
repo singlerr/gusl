@@ -12,6 +12,10 @@
         "version.h": "c",
         "gusl-log.h": "c",
         "ranges": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "format": "c",
+        "glsl_parser.h": "c",
+        "fstream": "c",
+        "istream": "c"
     }
 }

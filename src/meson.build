@@ -58,6 +58,8 @@ libsrc = [
   'shader_source.c',
 ]
 
+libsrc += ast_sources
+
 libgusl_shared = shared_library(
   'gusl',
   [libsrc, 'library.c'],
@@ -93,7 +95,7 @@ if gtk_builder_tool.found()
   endforeach
 endif
 
-src += ['main.c', 'gusl-application.c', revision_tag, resources, ast_sources]
+src += ['main.c', 'gusl-application.c', revision_tag, resources]
 
 executable(
   'gusl',

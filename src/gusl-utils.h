@@ -39,6 +39,6 @@ _adw_destroy_dialog (AdwAlertDialog *dialog,
 GThread *gusl_utils_get_main_thread (void);
 AdwAlertDialog *adw_alert_dialog_new_yes_or_no (const char *title, const char *body, GCallback yes_callback, GCallback no_callback);
 AdwAlertDialog *adw_alert_dialog_new_ok (const char *title, const char *body, GCallback ok_callback);
-
+AdwMessageDialog *adw_message_dialog_new_ok (GtkWindow *parent, const char *title, const char *body, GCallback ok_callback);
 
 G_END_DECLS

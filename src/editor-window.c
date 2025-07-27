@@ -31,7 +31,9 @@
 #include <glib/gi18n.h>
 
 #include "editor-window.h"
+#include "glsl_parser.h"
 #include "gusl-log.h"
+#include "gusl-utils.h"
 #include "shader_source.h"
 
 struct _EditorWindow
@@ -43,13 +45,41 @@ struct _EditorWindow
 G_DEFINE_TYPE (EditorWindow, editor_window, ADW_TYPE_APPLICATION_WINDOW)
 
 
-void editor_setup (gchar *path);
+void editor_setup (gchar *path, gpointer user_data);
+void error_cb (const char *str, int lineno, int first_col, int last_col, void *user_data);
+void on_shader_load (ShaderSource *src, void *user_data);
 
 void
-editor_setup (gchar *path)
+editor_setup (gchar *path, void *user_data)
 {
+  int ret;
+  if ((ret = load_shader_source_async ((const char *)path, on_shader_load, user_data)) < 0)
+    {
+      g_error ("Could not load shader file.\n");
+      return;
+    }
+}
 
-  GFile *file = g_file_new_for_path (path);
+void
+on_shader_load (ShaderSource *src, void *user_data)
+{
+  GtkWindow *win = GTK_WINDOW (user_data);
+  g_debug ("count: %d, path: %s\n", src->content.count, src->path);
+  for (int i = 0; i < src->content.count; i++)
+    {
+      struct glsl_parse_context parse_ctx;
+      ShaderFile content = src->content.files[i];
+      glsl_parse_context_init (&parse_ctx);
+      glsl_parse_set_error_cb (&parse_ctx, error_cb, (void *)win);
+
+      if (glsl_parse_string (&parse_ctx, content.content))
+        {
+        }
+      else
+        {
+          g_error ("Could not parse shader: %s\n", content.name);
+        }
+    }
 }
 
 static void
@@ -89,11 +119,26 @@ editor_window_init (EditorWindow *self)
 }
 
 GtkWidget *
-editor_window_new (GtkApplication *application, gpointer *user_data)
+editor_window_new (GtkApplication *application, gpointer user_data)
 {
   g_assert (GTK_IS_APPLICATION (application));
-  return g_object_new (EDITOR_TYPE_WINDOW,
-                       "application",
-                       application,
-                       NULL);
+
+  gpointer win = g_object_new (EDITOR_TYPE_WINDOW,
+                               "application",
+                               application,
+                               NULL);
+  editor_setup ((gchar *)user_data, win);
+
+  return win;
+}
+
+void
+error_cb (const char *str, int lineno, int first_col, int last_col, void *user_data)
+{
+  GtkWindow *win = GTK_WINDOW (user_data);
+  g_debug ("GLSL parse error line %d(%d-%d): %s\n", lineno, first_col, last_col, str);
+
+  AdwMessageDialog *dialog = adw_message_dialog_new_ok (win, _ ("Failed to load"), NULL, NULL);
+  adw_message_dialog_format_body (dialog, _ ("GLSL parse error line %d(%d-%d): %s"), lineno, first_col, last_col, str);
+  gtk_window_present (GTK_WINDOW (dialog));
 }

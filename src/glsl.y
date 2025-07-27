@@ -1358,7 +1358,7 @@ static void glsl_error(GLSL_LTYPE *loc, struct glsl_parse_context *c, const char
 {
 	c->error = true;
 	if (c->error_cb)
-		c->error_cb(s, loc->first_line, loc->first_column, loc->last_column);
+		c->error_cb(s, loc->first_line, loc->first_column, loc->last_column, c->user_data);
 }
 
 int list_length(struct glsl_node *n, int list_token)
@@ -1483,9 +1483,10 @@ void glsl_parse_context_init(struct glsl_parse_context *context)
 	context->error = false;
 }
 
-void glsl_parse_set_error_cb(struct glsl_parse_context *context, glsl_parse_error_cb_t error_cb)
+void glsl_parse_set_error_cb(struct glsl_parse_context *context, glsl_parse_error_cb_t error_cb, void* user_data)
 {
 	context->error_cb = error_cb;
+	context->user_data = user_data;
 }
 
 
