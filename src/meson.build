@@ -1,39 +1,5 @@
 src = []
 
-flex = find_program('flex')
-bison = find_program('bison')
-
-if not flex.found()
-  error('MESON_SKIP_TEST flex not found.')
-endif
-
-if not bison.found()
-  error('MESON_SKIP_TEST bison not found.')
-endif
-
-ast_sources = ['glsl_ast.c']
-
-lexargs = []
-parseargs = []
-lex = generator(
-  flex,
-  output: ['@BASENAME@.lexer.c', '@BASENAME@.lexer.h'],
-  arguments: lexargs + ['--outfile=@OUTPUT0@', '--header-file=@OUTPUT1@', '@INPUT@'],
-)
-
-parse = generator(
-  bison,
-  output: ['@BASENAME@.parser.c', '@BASENAME@.parser.h'],
-  arguments: parseargs
-  + ['-d', '@INPUT@', '-v', '--output=@OUTPUT0@', '--defines=@OUTPUT1@'],
-)
-
-lfiles = lex.process('glsl.lex')
-pfiles = parse.process('glsl.y')
-
-ast_sources += lfiles
-ast_sources += pfiles
-
 revision_tag = vcs_tag(
   input: 'version.h.in',
   output: 'version.h',
@@ -41,6 +7,7 @@ revision_tag = vcs_tag(
 
 pkg_dep += declare_dependency(sources: revision_tag)
 pkg_dep += dependency('gtknodes')
+pkg_dep += dependency('glslang')
 
 resources = gnome.compile_resources(
   'resources',
@@ -57,8 +24,6 @@ libsrc = [
   'editor-window.c',
   'shader_source.c',
 ]
-
-libsrc += ast_sources
 
 libgusl_shared = shared_library(
   'gusl',

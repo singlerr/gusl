@@ -16,6 +16,7 @@
         "format": "c",
         "glsl_parser.h": "c",
         "fstream": "c",
-        "istream": "c"
+        "istream": "c",
+        "shaderlang.h": "c"
     }
 }

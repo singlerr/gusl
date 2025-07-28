@@ -29,10 +29,10 @@
 #endif
 
 #include <glib/gi18n.h>
+#include <glslang/Public/ShaderLang.h>
 #include <time.h>
 
 #include "editor-window.h"
-#include "glsl_parser.h"
 #include "gusl-log.h"
 #include "gusl-utils.h"
 #include "shader_source.h"
@@ -95,19 +95,9 @@ on_shader_load (ShaderSource *src, void *user_data)
   g_debug ("count: %d, path: %s\n", src->content.count, src->path);
   for (int i = 0; i < src->content.count; i++)
     {
-      struct glsl_parse_context parse_ctx;
-      ShaderFile content = src->content.files[i];
-      glsl_parse_context_init (&parse_ctx);
-      glsl_parse_set_error_cb (&parse_ctx, error_cb, (void *)win);
 
-      if (glsl_parse_string (&parse_ctx, content.content))
-        {
+      ShaderFile content = src->content.files[i];
         }
-      else
-        {
-          g_error ("Could not parse shader: %s\n", content.name);
-        }
-    }
 }
 
 static void
